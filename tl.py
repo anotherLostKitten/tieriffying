@@ -1,3 +1,8 @@
+import sys
+import base64
+import re
+
+head = '''
 <html>
   <head>
 	<title>Tier List Maker</title>
@@ -86,9 +91,6 @@
 		  padding: 2px;
 		  height: 100%;
 		  width: 100%;
-	  }
-	  img {
-		  
 	  }
 	  img:not(.big) {
 		  min-height: 0px;
@@ -196,15 +198,28 @@
 			  <img class="big" id="bi"/>
 			</div>
 			<div class="tw" style="min-height: 450px;">
-			  <div class="elc">
-				<img src="uddin.png"/>
-				<img src="mcbarron.png"/>
-				<img src="besnos.png"/>
-				<img src="johnjohnsquare.png"/>
-			  </div>
-			</div>
-		  </div>
-		</td>
-	</tr></table>
-  </body>
+			  <div class="elc">'''
+tail = '''</div>
+</div>
+</div>
+</td>
+</tr></table>
+</body>
 </html>
+'''
+imgs = ''
+
+for fp in sys.argv[2:]:
+    fti = fp.rfind('.')
+    fni = max(fp.rfind('/'), fp.rfind('\\'))
+    ft = fp[fti+1:]
+    if fti >= 0 and ft in ['png', 'jpeg', 'jpg', 'exr', 'tiff', 'gif', 'webp', 'jfif']:
+        fn = fp[fni+1:fti]
+        with open(fp, "rb") as img:
+            src=base64.b64encode(img.read()).decode('utf-8')
+            imgs += f'<img src="data:image/{ft};base64,{src}" n="{fn}"/>'
+    else:
+        print(f'unrecognized file type {fp}, skipping')
+
+with open(sys.argv[1], "w") as f:
+    f.write(head + imgs + tail)
